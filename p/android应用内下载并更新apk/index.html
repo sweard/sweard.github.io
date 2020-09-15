@@ -1,0 +1,314 @@
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="背景 公司的APP之前一直是放在公司服务器，没有发布到应用市场，每次发布新版本用户更新都很麻烦。前段时间抽时间写了个应用内下载APK并更新的模块。 整个模块主要的几个类:
+ UpgradeManager UpgradeService FileResponseBody ResponseInterceptor  网络请求使用的是Retrofit2+Rxjava2"><title>Android应用内下载并更新APK</title><link rel=canonical href=https://zole.life/p/android%E5%BA%94%E7%94%A8%E5%86%85%E4%B8%8B%E8%BD%BD%E5%B9%B6%E6%9B%B4%E6%96%B0apk/><link rel=stylesheet href=https://zole.life/scss/style.min.css><meta property="og:title" content="Android应用内下载并更新APK"><meta property="og:description" content="背景 公司的APP之前一直是放在公司服务器，没有发布到应用市场，每次发布新版本用户更新都很麻烦。前段时间抽时间写了个应用内下载APK并更新的模块。 整个模块主要的几个类:
+ UpgradeManager UpgradeService FileResponseBody ResponseInterceptor  网络请求使用的是Retrofit2+Rxjava2"><meta property="og:url" content="https://zole.life/p/android%E5%BA%94%E7%94%A8%E5%86%85%E4%B8%8B%E8%BD%BD%E5%B9%B6%E6%9B%B4%E6%96%B0apk/"><meta property="og:site_name" content="3702"><meta property="og:type" content="article"><meta property="article:section" content="Post"><meta property="article:tag" content="Android"><meta property="article:tag" content="kotlin"><meta property="article:published_time" content="2018-05-19T10:07:55+00:00"><meta property="article:modified_time" content="2018-05-19T10:07:55+00:00"><meta name=twitter:title content="Android应用内下载并更新APK"><meta name=twitter:description content="背景 公司的APP之前一直是放在公司服务器，没有发布到应用市场，每次发布新版本用户更新都很麻烦。前段时间抽时间写了个应用内下载APK并更新的模块。 整个模块主要的几个类:
+ UpgradeManager UpgradeService FileResponseBody ResponseInterceptor  网络请求使用的是Retrofit2+Rxjava2"></head><body><div class="container extended flex on-phone--column align-items--flex-start article-page with-toolbar"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header class=site-info><figure class=site-avatar><img src=/img/zole_hu6c40e7c739345855743ed1c4f74e2379_188935_300x300_resize_q75_box.jpg width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+<span class=emoji>🍥</span></figure><h1 class=site-name><a href=https://zole.life>3702</a></h1><h2 class=site-description>槑头脑和她脑公的地盘</h2></header><nav class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg><span>Home</span></a></li><li><a href=/about/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg><span>About</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>Archives</span></a></li></nav></aside><main class="main full-width"><div id=article-toolbar><a href=https://zole.life class=back-home><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="15 6 9 12 15 18"/></svg><span>Back</span></a></div><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E5%8D%9A%E5%AE%A2>博客</a></header><h2 class=article-title><a href=https://zole.life/p/android%E5%BA%94%E7%94%A8%E5%86%85%E4%B8%8B%E8%BD%BD%E5%B9%B6%E6%9B%B4%E6%96%B0apk/>Android应用内下载并更新APK</a></h2><footer class=article-time><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><time class=article-time--published>May 19, 2018</time></footer></div></header><section class=article-content><h1 id=背景>背景</h1><p>公司的APP之前一直是放在公司服务器，没有发布到应用市场，每次发布新版本用户更新都很麻烦。前段时间抽时间写了个应用内下载APK并更新的模块。
+整个模块主要的几个类:</p><ul><li>UpgradeManager</li><li>UpgradeService</li><li>FileResponseBody</li><li>ResponseInterceptor</li></ul><p>网络请求使用的是Retrofit2+Rxjava2</p><h1 id=upgrademanager>UpgradeManager</h1><p>该类主要实现</p><ul><li>检查最新版本</li><li>升级信息提示</li><li>安装APK</li><li>删除冗余APK文件</li></ul><h2 id=检查最新版本>检查最新版本</h2><p>调用服务器提供的版本比对接口，将本地的版本名称提取出来封装为JSON字符串发送到服务器，根据服务器的返回结果做对应处理</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin> <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>checkUpdate</span>(context: Context, disposableObserver: DisposableObserver&lt;UpdateAck&gt;) {
+        <span style=color:#66d9ef>val</span> pm = context.packageManager
+        <span style=color:#66d9ef>val</span> versionName = pm.getPackageInfo(context.applicationInfo.packageName, <span style=color:#ae81ff>0</span>).versionName
+        <span style=color:#66d9ef>val</span> jsonObject = JSONObject()
+        jsonObject.put(<span style=color:#e6db74>&#34;versionName&#34;</span>, versionName)
+        LogUtil.d(tag, jsonObject.toString())
+        RetrofitClient.removeMethod(API.METHOD.CHECK_UPDATE)
+        <span style=color:#66d9ef>val</span> checkUpdateCall = RetrofitClient.apiService
+                .checkNewVer(RetrofitClient.body(API.METHOD.CHECK_UPDATE, jsonObject.toString()))
+                .compose(RetrofitClient.io2main())
+                .subscribeWith(disposableObserver)    
+        RetrofitClient.addMethod(javaClass.name, API.METHOD.CHECK_UPDATE, checkUpdateCall)
+    }
+</code></pre></div><p>下面贴出来的是手动检查升级的代码，无论是否需要升级都有相应提示，还需要一个<code>backgroundCheck(context: Context)</code>方法，在APP启动时调用，无需升级时不弹出提示打扰用户，代码就不贴了，只需省略部分提示代码。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin>     <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>manualCheck</span>(context: Context) {
+        <span style=color:#66d9ef>val</span> disposableObserver = <span style=color:#66d9ef>object</span> <span style=color:#960050;background-color:#1e0010>: </span><span style=color:#a6e22e>DisposableObserver</span>&lt;UpdateAck&gt;() {
+            <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>onComplete</span>() {}
+
+            <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>onNext</span>(t: UpdateAck) {
+                LogUtil.d(tag, t.toString())
+                <span style=color:#66d9ef>val</span> responseData = t.responseData
+                <span style=color:#66d9ef>if</span> (t.result == <span style=color:#e6db74>&#34;T&#34;</span> &amp;&amp; responseData != <span style=color:#66d9ef>null</span>) {
+                    <span style=color:#75715e>//无错误信息
+</span><span style=color:#75715e></span>                    <span style=color:#66d9ef>if</span> (responseData.errorMessage.isBlank()) {
+                        <span style=color:#75715e>//服务器存在不同版本
+</span><span style=color:#75715e></span>                        <span style=color:#66d9ef>if</span> (responseData.isNeedUpgrade) {
+                            <span style=color:#66d9ef>val</span> str = context.getString(R.string.need_upgrade)
+                            <span style=color:#66d9ef>val</span> msg = String.format(str, responseData.versionName)
+                            <span style=color:#66d9ef>val</span> upgradeVerName = <span style=color:#e6db74>&#34;yourAppName&#34;</span> + responseData.versionName
+                            showDialog(context, msg, responseData.upgradeUrl, upgradeVerName)
+                        } <span style=color:#66d9ef>else</span> {
+                            <span style=color:#66d9ef>val</span> msg = context.getString(R.string.no_need_upgrade)
+                            showDialog(context, msg)
+                        }
+                    } <span style=color:#66d9ef>else</span> {
+                        showDialog(context, responseData.errorMessage)
+                    }
+                } <span style=color:#66d9ef>else</span> {
+                    showDialog(context, t.errorMsg)
+                }
+            }
+
+            <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>onError</span>(e: Throwable) {
+                LogUtil.e(tag, e.message.toString())
+                showDialog(context, context.getString(R.string.network_state))
+            }
+
+        }
+        checkUpdate(context, disposableObserver)
+    }
+</code></pre></div><h2 id=升级信息提示>升级信息提示</h2><p><code>showDialog</code>方法中为<code>url</code>和<code>versionName</code>参数设置了默认值null，当不是提示版本有版本需要更新时可以只传两个参数，这样能使代码看起来更简洁。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin>  <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>showDialog</span>(context: Context?, msg: String, url: String? = <span style=color:#66d9ef>null</span>, versionName: String? = <span style=color:#66d9ef>null</span>) {
+        <span style=color:#75715e>//防止activity销毁后弹出提示导致程序崩溃
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>if</span> (context != <span style=color:#66d9ef>null</span>) {
+            <span style=color:#66d9ef>val</span> builder = AlertDialog.Builder(context)
+            builder.setMessage(msg)
+                    .setPositiveButton(R.string.ok) { p0, _ -&gt;
+                        p0.dismiss()
+                        <span style=color:#75715e>//有新版本时启动更新流程
+</span><span style=color:#75715e></span>                        <span style=color:#66d9ef>if</span> (url != <span style=color:#66d9ef>null</span>) {
+                            <span style=color:#66d9ef>if</span> (!hasDownLoad(versionName<span style=color:#f92672>!!</span>)) {
+                                LogUtil.d(tag, <span style=color:#e6db74>&#34;未下载$versionName&#34;</span> + <span style=color:#e6db74>&#34;APK&#34;</span>)
+                                startDownLoadService(context, url, versionName)
+                            } <span style=color:#66d9ef>else</span> {
+                                LogUtil.d(tag, <span style=color:#e6db74>&#34;已下载$versionName&#34;</span> + <span style=color:#e6db74>&#34;APK&#34;</span>)
+                                installAPK(context, versionName)
+                            }
+                        }
+                    }
+                    .setNegativeButton(R.string.cancel) { p0, _ -&gt;
+                        p0.dismiss()
+                    }.create().show()
+            <span style=color:#75715e>//通过EventBus通知AppInfo页面隐藏网络请求的旋转菊花
+</span><span style=color:#75715e></span>            EventBus.getDefault().post(EventMsg.AppInfoDismissProgressBar())
+        }
+    }
+</code></pre></div><p>如果当前版本和服务器上的版本不一致时，先调用<code>hasDownload(versionName!!)</code>方法检查指定路径是否存在最新的APK文件</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin><span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>hasDownLoad</span>(versionName: String): Boolean {
+        <span style=color:#66d9ef>return</span> apkFile(versionName).exists()
+    }
+    
+<span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>apkFile</span>(versionName: String): File {
+        <span style=color:#66d9ef>return</span> File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + <span style=color:#e6db74>&#34;/&#34;</span> + versionName + <span style=color:#e6db74>&#34;.apk&#34;</span>)
+    }
+</code></pre></div><p>如果存在则直接进行安装，如果没有最新版的APK文件，则通过 <code>startDownLoadService(context, url, versionName)</code>来开启UpgradeService进行后台下载。</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin>  <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>startDownLoadService</span>(context: Context, url: String, versionName: String) {
+        <span style=color:#66d9ef>val</span> intent = Intent(context, UpgradeService<span style=color:#f92672>::</span><span style=color:#66d9ef>class</span>.java)
+        intent.putExtra(<span style=color:#e6db74>&#34;url&#34;</span>, url)
+        intent.putExtra(<span style=color:#e6db74>&#34;versionName&#34;</span>, versionName)
+        context.startService(intent)
+    }
+</code></pre></div><h2 id=安装apk>安装APK</h2><p>安装代码:</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin>    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>installAPK</span>(context: Context, versionName: String) {
+        <span style=color:#66d9ef>val</span> install = installIntent(context, versionName)
+        context.startActivity(install)
+    }
+
+  <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>installIntent</span>(context: Context, versionName: String): Intent {
+        <span style=color:#66d9ef>val</span> file = apkFile(versionName)
+        <span style=color:#75715e>//7.0关于读写文件有更严格的要求，需要配置FileProvider
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>val</span> uri = <span style=color:#66d9ef>if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.N) {
+            FileProvider.getUriForFile(context, <span style=color:#e6db74>&#34;com.xxxxx.fileprovider&#34;</span>, file)
+        } <span style=color:#66d9ef>else</span> {
+            Uri.fromFile(file)
+        }
+        <span style=color:#66d9ef>val</span> install = Intent(Intent.ACTION_VIEW)
+        install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)<span style=color:#75715e>//为7.0添加
+</span><span style=color:#75715e></span>        install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        install.setDataAndType(uri, <span style=color:#e6db74>&#34;application/vnd.android.package-archive&#34;</span>)
+        <span style=color:#66d9ef>return</span> install
+    }
+</code></pre></div><h2 id=删除冗余apk文件>删除冗余APK文件</h2><p>在启动页面调用 <code>UpgradeManager.cleanOldApk(ctx)</code>检查当前运行的APP版本和指定路径的APK <code>versionName</code>是否相同，相同则删除</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin><span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>cleanOldApk</span>(context: Context) {
+        <span style=color:#66d9ef>val</span> pm = context.packageManager
+        <span style=color:#66d9ef>val</span> locVersionName = pm.getPackageInfo(context.applicationInfo.packageName, <span style=color:#ae81ff>0</span>).versionName
+        <span style=color:#75715e>//已下载的APK和当前安装的版本相同,删除下载的APK
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>if</span> (hasDownLoad(<span style=color:#e6db74>&#34;yourAppName$locVersionName&#34;</span>)) {
+            apkFile(<span style=color:#e6db74>&#34;yourAppName$locVersionName&#34;</span>).delete()
+        }
+    }
+</code></pre></div><h1 id=upgradeservice>UpgradeService</h1><p>该类主要实现</p><ul><li>APK<code>下载</code> <code>保存</code> <code>安装</code></li><li>通知中心更新下载进度</li></ul><h2 id=oncreate>onCreate</h2><p><strong>初始化升级服务</strong></p><ol><li>注册EventBus并发送粘性广播提示升级服务已启动</li><li>初始化通知中心对象，设置标题，信息，图标</li></ol><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin><span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>onCreate</span>() {
+        <span style=color:#66d9ef>super</span>.onCreate()
+        LogUtil.d(tag, <span style=color:#e6db74>&#34;onCreate&#34;</span>)
+        EventBus.getDefault().register(<span style=color:#66d9ef>this</span>)
+        EventBus.getDefault().postSticky(EventMsg.UpgradeServiceState(<span style=color:#66d9ef>true</span>))
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) <span style=color:#66d9ef>as</span> NotificationManager
+        notificationBuilder = NotificationCompat.Builder(<span style=color:#66d9ef>this</span>, <span style=color:#e6db74>&#34;upgrade&#34;</span>)
+        notificationBuilder.setContentTitle(getString(R.string.notification_upgrade_title))
+                .setContentText(getString(R.string.notification_loading))
+                .setSmallIcon(R.mipmap.mainlancher)
+        notificationBuilder.priority = PRIORITY_HIGH
+        <span style=color:#75715e>//点击后自动移除通知
+</span><span style=color:#75715e></span>        notificationBuilder.setAutoCancel(<span style=color:#66d9ef>true</span>)
+    }
+</code></pre></div><h2 id=onstartcommand>onStartCommand</h2><p><strong>开始下载</strong>
+通过<code>isDowloading</code>和<code>needDownLoad</code>判断是否需要执行下载操作</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin> <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>onStartCommand</span>(intent: Intent, flags: Int, startId: Int): Int {
+        LogUtil.d(tag, <span style=color:#e6db74>&#34;onStartCommand：startId$startId&#34;</span>)
+        url = intent.getStringExtra(<span style=color:#e6db74>&#34;url&#34;</span>)
+        versionName = intent.getStringExtra(<span style=color:#e6db74>&#34;versionName&#34;</span>)
+        <span style=color:#66d9ef>val</span> needDownLoad = !UpgradeManager.hasDownLoad(versionName)
+        <span style=color:#66d9ef>if</span> (!isDowloading &amp;&amp; needDownLoad) {
+            retryCount = <span style=color:#ae81ff>0</span>
+            downLoadAPK()
+        } <span style=color:#66d9ef>else</span> {
+            LogUtil.d(tag, <span style=color:#e6db74>&#34;已有下载任务在执行！！！！&#34;</span>)
+        }
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>super</span>.onStartCommand(intent, flags, startId)
+    }
+</code></pre></div><h2 id=apk下载并保存并安装>APK下载并保存并安装</h2><h3 id=downloadapk>downLoadAPK</h3><p><code>retryCount</code>重试次数，目前设置的重试次数为7次。
+下载开始后将<code>isDowloading</code>置为<code>true</code>
+请求成功后调用<code>saveFile(fileResponseBody: ResponseBody)</code>读取数据写入本地</p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin> <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>downLoadAPK</span>() {
+        <span style=color:#75715e>//下载次数
+</span><span style=color:#75715e></span>        retryCount++
+        LogUtil.d(tag, <span style=color:#e6db74>&#34;开始下载&#34;</span>)
+        RetrofitClient.removeMethod(<span style=color:#e6db74>&#34;downloadAPK&#34;</span>)
+        <span style=color:#66d9ef>val</span> downLoadCall = RetrofitClient.apiService.getApk(url)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribeWith(<span style=color:#66d9ef>object</span> <span style=color:#960050;background-color:#1e0010>: </span><span style=color:#a6e22e>DisposableObserver</span>&lt;ResponseBody&gt;() {
+                    <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>onStart</span>() {
+                        isDowloading = <span style=color:#66d9ef>true</span>
+                    }
+
+                    <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>onComplete</span>() {
+                        LogUtil.d(tag, <span style=color:#e6db74>&#34;onComplete&#34;</span>)
+                    }
+
+                    <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>onNext</span>(t: ResponseBody) {
+                        LogUtil.d(tag, <span style=color:#e6db74>&#34;onNext&#34;</span>)
+                        saveFile(t)
+                    }
+
+                    <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>onError</span>(e: Throwable) {
+                        isDowloading = <span style=color:#66d9ef>false</span>
+                        LogUtil.e(tag, e.message.toString())
+                    }
+
+                })
+
+        RetrofitClient.addMethod(javaClass.name, <span style=color:#e6db74>&#34;downloadAPK&#34;</span>, downLoadCall)
+    }
+</code></pre></div><h3 id=savefile>saveFile</h3><p>写入文件到本地<code>Download</code>公共文件夹
+<strong>期间若发生错误</strong></p><ol><li>通过<code>UpgradeManager.apkFile(versionName).delete()</code>清除未下载完的文件</li><li>通过<code> updateNotification(R.string.notification_err_retry)</code>更新通知中心提示</li><li>通过<code>retryCount</code>判断是否需要重试，超过重试上限则更新通知中心并调用<code>stopSelf()</code>停止服务</li></ol><p><strong>顺利保存到本地</strong>则调用<code>installAPK()</code>安装APK，并将<code>isDowloading</code>置为<code>false</code></p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin><span style=color:#66d9ef>private</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>saveFile</span>(fileResponseBody: ResponseBody) {
+        Observable.create&lt;File&gt; { e -&gt;
+            <span style=color:#66d9ef>var</span> inputStream: InputStream? = <span style=color:#66d9ef>null</span>
+            <span style=color:#66d9ef>var</span> fileOutputStream: FileOutputStream? = <span style=color:#66d9ef>null</span>
+            <span style=color:#66d9ef>val</span> buffer = ByteArray(<span style=color:#ae81ff>2048</span>)
+            <span style=color:#66d9ef>val</span> apkFile = UpgradeManager.apkFile(versionName)
+            LogUtil.d(tag, <span style=color:#e6db74>&#34;保存文件到&#34;</span> + apkFile.absolutePath)
+            <span style=color:#66d9ef>try</span> {
+                inputStream = fileResponseBody.byteStream()
+                fileOutputStream = FileOutputStream(apkFile)
+                <span style=color:#66d9ef>var</span> len = inputStream<span style=color:#f92672>!!</span>.read(buffer)
+                <span style=color:#66d9ef>while</span> (len != -<span style=color:#ae81ff>1</span>) {
+                    fileOutputStream.write(buffer, <span style=color:#ae81ff>0</span>, len)
+                    len = inputStream.read(buffer)
+                }
+                fileOutputStream.flush()
+                e.onNext(apkFile)
+            } <span style=color:#66d9ef>catch</span> (err: IOException) {
+                e.onError(err)
+            } <span style=color:#66d9ef>finally</span> {
+                inputStream<span style=color:#f92672>?.</span>close()
+                fileOutputStream<span style=color:#f92672>?.</span>close()
+                e.onComplete()
+            }
+        }.subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe({
+                    isDowloading = <span style=color:#66d9ef>false</span>
+                    installAPK()
+                }, { e -&gt;
+                    isDowloading = <span style=color:#66d9ef>false</span>
+                    LogUtil.e(tag, e.message.toString())
+                    UpgradeManager.apkFile(versionName).delete()
+                    updateNotification(R.string.notification_err_retry)
+                    <span style=color:#66d9ef>if</span> (retryCount &lt; <span style=color:#ae81ff>7</span>) {
+                        downLoadAPK()
+                    } <span style=color:#66d9ef>else</span> {
+                        updateNotification(R.string.notification_err_retry_later)
+                        stopSelf()
+                    }
+                })
+    }
+</code></pre></div><p><strong>updateNotification(resId: Int)</strong></p><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin> <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>updateNotification</span>(resId: Int) {
+        <span style=color:#66d9ef>val</span> string = getString(resId)
+        notificationBuilder.setContentText(string)
+        notificationManager.notify(<span style=color:#ae81ff>0</span>, notificationBuilder.build())
+    }
+</code></pre></div><h3 id=installapk>installAPK</h3><ol><li>通过<code>notificationBuilder.setProgress(0, 0, false)</code>移除通知中的下载进度条</li><li>通过<code>notificationBuilder.setContentIntent(pendingIntent)</code>设置通知的点击响应，以便用户在安装界面点击了<code>取消</code>还能通过点击通知进行安装</li><li>通过<code> updateNotification(R.string.notification_load_complete)</code>更新通知中心提示</li><li>执行安装</li><li>通过<code>stopSelf()</code>停止服务</li></ol><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin> <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>installAPK</span>() {
+        notificationBuilder.setProgress(<span style=color:#ae81ff>0</span>, <span style=color:#ae81ff>0</span>, <span style=color:#66d9ef>false</span>)
+        <span style=color:#66d9ef>val</span> install = UpgradeManager.installIntent(applicationContext, versionName)
+        <span style=color:#66d9ef>val</span> pendingIntent = PendingIntent.getActivity(<span style=color:#66d9ef>this</span>, <span style=color:#ae81ff>0</span>, install, PendingIntent.FLAG_UPDATE_CURRENT)
+        notificationBuilder.setContentIntent(pendingIntent)
+        updateNotification(R.string.notification_load_complete)
+        startActivity(install)
+        stopSelf()
+    }
+</code></pre></div><h2 id=ondestroy>onDestroy</h2><ol><li>停止所有当前类名相关网络请求</li><li>发送粘性广播通知更新服务已停止</li><li>注销<code>EventBus</code></li></ol><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin><span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>onDestroy</span>() {
+        <span style=color:#66d9ef>super</span>.onDestroy()
+        LogUtil.d(tag, <span style=color:#e6db74>&#34;onDestroy&#34;</span>)
+        RetrofitClient.removeAll(javaClass.name)
+        EventBus.getDefault().postSticky(EventMsg.UpgradeServiceState(<span style=color:#66d9ef>false</span>))
+        EventBus.getDefault().unregister(<span style=color:#66d9ef>this</span>)
+    }
+</code></pre></div><h2 id=下载进度百分比>下载进度百分比</h2><p>下载进度更新通过<code>EventBus</code>+<code>ResponseInterceptor</code>+<code>FileResponseBody</code>实现</p><ol><li>自定义<code>ResponseBody</code>即下文的<code>FileResponseBody</code>，重写<code>ResponseBody</code>的<code>fun source()</code>方法，在该方法内获取当前下载进度并通过<code>EventBus</code>广播</li><li>自定义<code>Interceptor</code>即下文的<code>ResponseInterceptor</code>，将原<code>ResponseBody</code>替换为<code>FileResponseBody</code>以获取下载进度</li><li>在创建<code>OkHttpClient</code>的过程中通过<code>addNetworkInterceptor(ResponseInterceptor())</code>将自定义网络拦截器添加进去</li><li>在<code>UpgradeService</code>接收下载进度并更新到通知中心</li></ol><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin>    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>downloadProgress</span>(event: EventMsg.FileLoading) {
+        <span style=color:#66d9ef>val</span> progress = (event.bytesRead / event.contentLength) * <span style=color:#ae81ff>100</span>
+        <span style=color:#66d9ef>val</span> progressStr = String.format(<span style=color:#e6db74>&#34;%.2f&#34;</span>, progress)
+        <span style=color:#75715e>//以1%为步进，大量更新会导致通知中心下拉卡死
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>if</span> (progressStr.endsWith(<span style=color:#e6db74>&#34;00&#34;</span>)) {
+            notificationBuilder.setProgress(<span style=color:#ae81ff>100</span>, progress.toInt(), <span style=color:#66d9ef>false</span>)
+            notificationManager.notify(<span style=color:#ae81ff>0</span>, notificationBuilder.build())
+        }
+    }
+</code></pre></div><h1 id=fileresponsebody>FileResponseBody</h1><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin><span style=color:#66d9ef>class</span> <span style=color:#a6e22e>FileResponseBody</span>(<span style=color:#66d9ef>private</span> <span style=color:#66d9ef>val</span> originalResponse: Response) : ResponseBody() {
+
+    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>var</span> bufferedSource: BufferedSource? = <span style=color:#66d9ef>null</span>
+
+    init {
+        LogUtil.d(<span style=color:#e6db74>&#34;FileResponseBody init&#34;</span>)
+    }
+
+    <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>contentType</span>(): MediaType? {
+        <span style=color:#66d9ef>return</span> originalResponse.body()<span style=color:#f92672>?.</span>contentType()
+    }
+
+    <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>contentLength</span>(): Long {<span style=color:#75715e>// 返回文件的总长度，也就是进度条的max
+</span><span style=color:#75715e></span>        <span style=color:#66d9ef>return</span> originalResponse.body()<span style=color:#f92672>!!</span>.contentLength()
+    }
+
+    <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>source</span>(): BufferedSource {
+        <span style=color:#66d9ef>if</span> (bufferedSource == <span style=color:#66d9ef>null</span>) {
+            bufferedSource = Okio.buffer(source(originalResponse.body()<span style=color:#f92672>!!</span>.source()))
+        }
+        <span style=color:#66d9ef>return</span> bufferedSource<span style=color:#f92672>!!</span>
+    }
+
+    <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>source</span>(source: Source): Source {
+        <span style=color:#66d9ef>return</span> <span style=color:#66d9ef>object</span> <span style=color:#960050;background-color:#1e0010>: </span><span style=color:#a6e22e>ForwardingSource</span>(source) {
+            <span style=color:#66d9ef>var</span> totalBytesRead = <span style=color:#ae81ff>0L</span>
+            <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>read</span>(sink: Buffer, byteCount: Long): Long {
+                <span style=color:#66d9ef>val</span> bytesRead = <span style=color:#66d9ef>super</span>.read(sink, byteCount)
+                <span style=color:#75715e>// read() returns the number of bytes read, or -1 if this source is exhausted.
+</span><span style=color:#75715e></span>                totalBytesRead += <span style=color:#66d9ef>if</span> (bytesRead == -<span style=color:#ae81ff>1L</span>) <span style=color:#ae81ff>0</span> <span style=color:#66d9ef>else</span> bytesRead
+                LogUtil.d(<span style=color:#e6db74>&#34;readed:&#34;</span>, totalBytesRead.toString())
+                EventBus.getDefault().post(EventMsg.FileLoading(contentLength().toFloat(), totalBytesRead.toFloat()))
+                <span style=color:#66d9ef>return</span> bytesRead
+            }
+        }
+    }
+
+}
+</code></pre></div><h1 id=responseinterceptor>ResponseInterceptor</h1><div class=highlight><pre style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-kotlin data-lang=kotlin> <span style=color:#66d9ef>private</span> <span style=color:#66d9ef>class</span> <span style=color:#a6e22e>ResponseInterceptor</span> : Interceptor {
+        <span style=color:#66d9ef>override</span> <span style=color:#66d9ef>fun</span> <span style=color:#a6e22e>intercept</span>(chain: Interceptor.Chain): Response {
+            <span style=color:#66d9ef>val</span> request = chain.request()
+            LogUtil.d(<span style=color:#e6db74>&#34;request.url&#34;</span>, request.url().toString())
+            <span style=color:#75715e>//地址为下载APK的地址时替换为FileResponseBody
+</span><span style=color:#75715e></span>            <span style=color:#66d9ef>if</span> (request.url().toString().startsWith(<span style=color:#e6db74>&#34;http://www.******.com&#34;</span>)) {
+                LogUtil.d(<span style=color:#e6db74>&#34;new Response&#34;</span>)
+                <span style=color:#66d9ef>val</span> response = chain.proceed(request)
+                <span style=color:#66d9ef>return</span> response.newBuilder().body(FileResponseBody(response)).build()
+            }
+            <span style=color:#66d9ef>return</span> chain.proceed(request)
+        }
+    }
+</code></pre></div></section><footer class=article-footer><section class=article-tags><a href=/tags/android>Android</a>
+<a href=/tags/kotlin>Kotlin</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg><span>Licenced under CC BY-NC-SA 4.0</span></section></footer></article><aside class="widget related-contents--wrapper"></aside><div class=disqus-container><div id=disqus_thread></div><script type=application/javascript>var disqus_config=function(){};(function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById('disqus_thread').innerHTML='Disqus comments not available by default when the website is previewed locally.';return;}
+var d=document,s=d.createElement('script');s.async=true;s.src='//'+"hugo-theme-stack"+'.disqus.com/embed.js';s.setAttribute('data-timestamp',+new Date());(d.head||d.body).appendChild(s);})();</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></div><style>.disqus-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--content-padding)}</style><footer class=site-footer><section class=copyright>&copy; 2020 3702</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank>Stack</a></b> designed by
+<a href=https://jimmycai.com target=_blank>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true style=display:none><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const customFont=document.createElement('link');customFont.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";customFont.type="text/css";customFont.rel="stylesheet";document.head.appendChild(customFont);}());</script></body></html>

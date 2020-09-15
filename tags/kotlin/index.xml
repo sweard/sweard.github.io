@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>kotlin on 3702</title><link>https://zole.life/tags/kotlin/</link><description>Recent content in kotlin on 3702</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 19 May 2018 10:07:55 +0000</lastBuildDate><atom:link href="https://zole.life/tags/kotlin/index.xml" rel="self" type="application/rss+xml"/><item><title>Android应用内下载并更新APK</title><link>https://zole.life/p/android%E5%BA%94%E7%94%A8%E5%86%85%E4%B8%8B%E8%BD%BD%E5%B9%B6%E6%9B%B4%E6%96%B0apk/</link><pubDate>Sat, 19 May 2018 10:07:55 +0000</pubDate><guid>https://zole.life/p/android%E5%BA%94%E7%94%A8%E5%86%85%E4%B8%8B%E8%BD%BD%E5%B9%B6%E6%9B%B4%E6%96%B0apk/</guid><description>&lt;h1 id="背景">背景&lt;/h1>
+&lt;p>公司的APP之前一直是放在公司服务器，没有发布到应用市场，每次发布新版本用户更新都很麻烦。前段时间抽时间写了个应用内下载APK并更新的模块。
+整个模块主要的几个类:&lt;/p>
+&lt;ul>
+&lt;li>UpgradeManager&lt;/li>
+&lt;li>UpgradeService&lt;/li>
+&lt;li>FileResponseBody&lt;/li>
+&lt;li>ResponseInterceptor&lt;/li>
+&lt;/ul>
+&lt;p>网络请求使用的是Retrofit2+Rxjava2&lt;/p></description></item></channel></rss>

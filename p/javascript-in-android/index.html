@@ -1,221 +1,429 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Android 中动态加载 JavaScript"><title>JavaScript in Android</title><link rel=canonical href=https://zole.life/p/javascript-in-android/><link rel=stylesheet href=https://zole.life/scss/style.min.css><meta property="og:title" content="JavaScript in Android"><meta property="og:description" content="Android 中动态加载 JavaScript"><meta property="og:url" content="https://zole.life/p/javascript-in-android/"><meta property="og:site_name" content="3702"><meta property="og:type" content="article"><meta property="article:section" content="Post"><meta property="article:tag" content="Android"><meta property="article:tag" content="kotlin"><meta property="article:published_time" content="2022-08-14T15:16:47+08:00"><meta property="article:modified_time" content="2022-08-14T15:16:47+08:00"><meta name=twitter:title content="JavaScript in Android"><meta name=twitter:description content="Android 中动态加载 JavaScript"><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/site.webmanifest><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><meta name=msapplication-TileColor content="#da532c"><meta name=theme-color content="#ffffff"></head><body><div class="container extended flex on-phone--column align-items--flex-start article-page with-toolbar"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
-<span class=hamburger-box><span class=hamburger-inner></span></span></button><header class=site-info><figure class=site-avatar><img src=/img/zole_hu6c40e7c739345855743ed1c4f74e2379_188935_300x300_resize_q75_box.jpg width=300 height=300 class=site-logo loading=lazy alt=Avatar>
-<span class=emoji>🍥</span></figure><h1 class=site-name><a href=https://zole.life>3702</a></h1><h2 class=site-description>槑头脑和她脑公的地盘</h2></header><nav class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg><span>Home</span></a></li><li><a href=/about/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg><span>About</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>Archives</span></a></li></nav></aside><main class="main full-width"><div id=article-toolbar><a href=https://zole.life class=back-home><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chevron-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="15 6 9 12 15 18"/></svg><span>Back</span></a></div><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E5%8D%9A%E5%AE%A2>博客</a></header><h2 class=article-title><a href=https://zole.life/p/javascript-in-android/>JavaScript in Android</a></h2><h3 class=article-subtitle>Android 中动态加载 JavaScript</h3><footer class=article-time><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><time class=article-time--published>Aug 14, 2022</time></footer></div></header><section class=article-content><h1 id=通过javascript解析蓝牙指令及蓝牙返回数据>通过JavaScript解析蓝牙指令及蓝牙返回数据</h1><h2 id=raw指令存储格式>Raw指令存储格式</h2><p>将ByteArray转换成HexString，根据指令类型及指令名称生成JSONObject。
-服务器以JSON格式保存蓝牙指令。</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>	<span style=color:#f92672>&#34;cmdType&#34;</span>: {
-</span></span><span style=display:flex><span>		<span style=color:#f92672>&#34;cmdName&#34;</span>: <span style=color:#e6db74>&#34;HexString(蓝牙指令)&#34;</span>
-</span></span><span style=display:flex><span>	}
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h2 id=bytearray-与-hexstring互相转换>ByteArray 与 HexString互相转换</h2><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript><span style=display:flex><span><span style=color:#75715e>// Convert a hex string to a byte array
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>hexToBytes</span>(<span style=color:#a6e22e>hex</span>) {
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>bytes</span> <span style=color:#f92672>=</span> [], <span style=color:#a6e22e>c</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>length</span>; <span style=color:#a6e22e>c</span> <span style=color:#f92672>+=</span> <span style=color:#ae81ff>2</span>)
-</span></span><span style=display:flex><span>        <span style=color:#a6e22e>bytes</span>.<span style=color:#a6e22e>push</span>(parseInt(<span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>substr</span>(<span style=color:#a6e22e>c</span>, <span style=color:#ae81ff>2</span>), <span style=color:#ae81ff>16</span>));
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>bytes</span>;
-</span></span><span style=display:flex><span>}
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#75715e>// Convert a byte array to a hex string
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span><span style=color:#66d9ef>function</span> <span style=color:#a6e22e>bytesToHex</span>(<span style=color:#a6e22e>bytes</span>) {
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>hex</span> <span style=color:#f92672>=</span> [], <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>bytes</span>.<span style=color:#a6e22e>length</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>current</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>bytes</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>0</span> <span style=color:#f92672>?</span> <span style=color:#a6e22e>bytes</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>+</span> <span style=color:#ae81ff>256</span> <span style=color:#f92672>:</span> <span style=color:#a6e22e>bytes</span>[<span style=color:#a6e22e>i</span>];
-</span></span><span style=display:flex><span>        <span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>push</span>((<span style=color:#a6e22e>current</span> <span style=color:#f92672>&gt;&gt;&gt;</span> <span style=color:#ae81ff>4</span>).<span style=color:#a6e22e>toString</span>(<span style=color:#ae81ff>16</span>));
-</span></span><span style=display:flex><span>        <span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>push</span>((<span style=color:#a6e22e>current</span> <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xF</span>).<span style=color:#a6e22e>toString</span>(<span style=color:#ae81ff>16</span>));
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>    <span style=color:#75715e>//设置分隔符号,转换成大写
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>join</span>(<span style=color:#e6db74>&#34;&#34;</span>).<span style=color:#a6e22e>toUpperCase</span>();
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h2 id=javascript生成蓝牙指令>JavaScript生成蓝牙指令</h2><h3 id=输入>输入</h3><table><thead><tr><th>参数</th><th>类型</th><th>是否必需</th><th>备注</th></tr></thead><tbody><tr><td>cmdType</td><td>String</td><td>是</td><td>设备类型、指令类型</td></tr><tr><td>cmdName</td><td>String</td><td>是</td><td>指令名称</td></tr><tr><td>parameters</td><td>JSONObject</td><td>否</td><td>指令参数，按需动态生成</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
-</span></span><span style=display:flex><span>    <span style=color:#960050;background-color:#1e0010>cmdType:</span><span style=color:#f92672>&#34;WoBlindTilt&#34;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#960050;background-color:#1e0010>cmdName:</span><span style=color:#f92672>&#34;move&#34;</span>,
-</span></span><span style=display:flex><span>    <span style=color:#960050;background-color:#1e0010>parameters:{</span>
-</span></span><span style=display:flex><span>        <span style=color:#960050;background-color:#1e0010>percent:100</span>
-</span></span><span style=display:flex><span>    } 
-</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>}</span>
-</span></span></code></pre></div><h3 id=解析>解析</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-javascript data-lang=javascript><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>cmdJson</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;&#39;</span>;
-</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#a6e22e>cmdObj</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>JSON</span>.<span style=color:#a6e22e>parse</span>(<span style=color:#a6e22e>cmdJson</span>);
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>CmdGenerator</span> <span style=color:#f92672>=</span> (<span style=color:#66d9ef>function</span>() {
-</span></span><span style=display:flex><span>  
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>getCmd</span>(<span style=color:#a6e22e>request</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>requestJson</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>JSON</span>.<span style=color:#a6e22e>parse</span>(<span style=color:#a6e22e>request</span>);
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>cmdType</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>requestJson</span>.<span style=color:#a6e22e>cmdType</span>;
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>cmdName</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>requestJson</span>.<span style=color:#a6e22e>cmdName</span>;
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>typeObj</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>cmdObj</span>[<span style=color:#a6e22e>cmdType</span>];
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span>(<span style=color:#a6e22e>typeObj</span> <span style=color:#f92672>==</span> <span style=color:#66d9ef>undefined</span>) {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#34;no such cmdType: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>cmdType</span>;
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>rawCmd</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>typeObj</span>[<span style=color:#a6e22e>cmdName</span>];
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span>(<span style=color:#a6e22e>rawCmd</span> <span style=color:#f92672>==</span> <span style=color:#66d9ef>undefined</span>) {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#34;no such cmdName: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>cmdName</span> <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34; with cmdType: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>cmdType</span>;
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>parameters</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>requestJson</span>.<span style=color:#a6e22e>parameters</span>;
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span>(<span style=color:#a6e22e>parameters</span> <span style=color:#f92672>!=</span> <span style=color:#66d9ef>undefined</span>) {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>getByCmdType</span>(<span style=color:#a6e22e>cmdType</span>,<span style=color:#a6e22e>cmdName</span>,<span style=color:#a6e22e>parameters</span>);
-</span></span><span style=display:flex><span>        } <span style=color:#66d9ef>else</span> {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>bytesToHex</span>(<span style=color:#a6e22e>hexToBytes</span>(<span style=color:#a6e22e>rawCmd</span>));
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>getByCmdType</span>(<span style=color:#a6e22e>cmdType</span>,<span style=color:#a6e22e>cmdName</span>,<span style=color:#a6e22e>parameters</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>typeObj</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>cmdObj</span>[<span style=color:#a6e22e>cmdType</span>];
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>switch</span>(<span style=color:#a6e22e>typeObj</span>) {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>case</span> <span style=color:#a6e22e>cmdObj</span>.<span style=color:#a6e22e>WoBlindTilt</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>getByBlindTiltCmdName</span>(<span style=color:#a6e22e>cmdName</span>,<span style=color:#a6e22e>parameters</span>);
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>default</span> <span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#34;no such cmdType: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>cmdType</span> <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34; with parameters&#34;</span>;
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>getByBlindTiltCmdName</span>(<span style=color:#a6e22e>cmdName</span>,<span style=color:#a6e22e>parameters</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>rawCmd</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>cmdObj</span>.<span style=color:#a6e22e>WoBlindTilt</span>[<span style=color:#a6e22e>cmdName</span>];
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>switch</span>(<span style=color:#a6e22e>rawCmd</span>) {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>case</span> <span style=color:#a6e22e>cmdObj</span>.<span style=color:#a6e22e>WoBlindTilt</span>.<span style=color:#a6e22e>move</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>getBlindTiltMoveCmd</span>(<span style=color:#a6e22e>rawCmd</span>,<span style=color:#a6e22e>parameters</span>);
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>case</span> <span style=color:#a6e22e>cmdObj</span>.<span style=color:#a6e22e>WoBlindTilt</span>.<span style=color:#a6e22e>setDirectionCmd</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>getBlindTiltDirectionCmd</span>(<span style=color:#a6e22e>rawCmd</span>,<span style=color:#a6e22e>parameters</span>);
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>default</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#34;no such cmdName: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>cmdName</span> <span style=color:#f92672>+</span>  <span style=color:#e6db74>&#34; with cmdType: WoBlindTilt&#34;</span> <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34; with parameters&#34;</span>;
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>getBlindTiltMoveCmd</span>(<span style=color:#a6e22e>rawCmd</span>,<span style=color:#a6e22e>parameters</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>rawCmd</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>hex8</span>(<span style=color:#a6e22e>parameters</span>.<span style=color:#a6e22e>percent</span>);
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>getBlindTiltDirectionCmd</span>(<span style=color:#a6e22e>rawCmd</span>,<span style=color:#a6e22e>parameters</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>data</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>parameters</span>.<span style=color:#a6e22e>direction</span> <span style=color:#f92672>|</span> <span style=color:#ae81ff>0x02</span>;
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>rawCmd</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>hex8</span>(<span style=color:#a6e22e>data</span>);
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>hexToBytes</span>(<span style=color:#a6e22e>hex</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>bytes</span> <span style=color:#f92672>=</span> [], <span style=color:#a6e22e>c</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>length</span>; <span style=color:#a6e22e>c</span> <span style=color:#f92672>+=</span> <span style=color:#ae81ff>2</span>)
-</span></span><span style=display:flex><span>            <span style=color:#a6e22e>bytes</span>.<span style=color:#a6e22e>push</span>(parseInt(<span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>substr</span>(<span style=color:#a6e22e>c</span>, <span style=color:#ae81ff>2</span>), <span style=color:#ae81ff>16</span>));
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>bytes</span>;
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>bytesToHex</span>(<span style=color:#a6e22e>bytes</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>hex</span> <span style=color:#f92672>=</span> [], <span style=color:#a6e22e>i</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>i</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>bytes</span>.<span style=color:#a6e22e>length</span>; <span style=color:#a6e22e>i</span><span style=color:#f92672>++</span>) {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>current</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>bytes</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>&lt;</span> <span style=color:#ae81ff>0</span> <span style=color:#f92672>?</span> <span style=color:#a6e22e>bytes</span>[<span style=color:#a6e22e>i</span>] <span style=color:#f92672>+</span> <span style=color:#ae81ff>256</span> <span style=color:#f92672>:</span> <span style=color:#a6e22e>bytes</span>[<span style=color:#a6e22e>i</span>];
-</span></span><span style=display:flex><span>            <span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>push</span>((<span style=color:#a6e22e>current</span> <span style=color:#f92672>&gt;&gt;&gt;</span> <span style=color:#ae81ff>4</span>).<span style=color:#a6e22e>toString</span>(<span style=color:#ae81ff>16</span>));
-</span></span><span style=display:flex><span>            <span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>push</span>((<span style=color:#a6e22e>current</span> <span style=color:#f92672>&amp;</span> <span style=color:#ae81ff>0xF</span>).<span style=color:#a6e22e>toString</span>(<span style=color:#ae81ff>16</span>));
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>join</span>(<span style=color:#e6db74>&#34;&#34;</span>).<span style=color:#a6e22e>toUpperCase</span>();
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>hex8</span>(<span style=color:#a6e22e>val</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#a6e22e>val</span> <span style=color:#f92672>&amp;=</span> <span style=color:#ae81ff>0xFF</span>;
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>hex</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>val</span>.<span style=color:#a6e22e>toString</span>(<span style=color:#ae81ff>16</span>).<span style=color:#a6e22e>toUpperCase</span>();
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> (<span style=color:#e6db74>&#34;00&#34;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>hex</span>).<span style=color:#a6e22e>slice</span>(<span style=color:#f92672>-</span><span style=color:#ae81ff>2</span>);
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> {
-</span></span><span style=display:flex><span>        <span style=color:#a6e22e>getCmd</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>getCmd</span>
-</span></span><span style=display:flex><span>    };
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>})();
-</span></span></code></pre></div><h3 id=输出>输出</h3><h4 id=原始指令无需组装拼接参数>原始指令（无需组装、拼接参数）</h4><ul><li>HexString</li></ul><h4 id=组合指令>组合指令</h4><ul><li>在JavaScript中组合后转换为HexString</li></ul><h2 id=javascript解析蓝牙返回数据>JavaScript解析蓝牙返回数据</h2><p>获取设备返回的结果后，通过JavaScript解析数据</p><h3 id=输入-1>输入</h3><table><thead><tr><th>参数</th><th>类型</th><th>是否必需</th><th>备注</th></tr></thead><tbody><tr><td>cmdType</td><td>String</td><td>是</td><td>设备类型、指令类型</td></tr><tr><td>cmdName</td><td>String</td><td>是</td><td>指令名称</td></tr><tr><td>input</td><td>String</td><td>是</td><td>设备返回的结果</td></tr></tbody></table><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-JSON data-lang=JSON><span style=display:flex><span>{
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#960050;background-color:#1e0010>cmdType:</span><span style=color:#f92672>&#34;WoBlindTilt&#34;</span>,
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#960050;background-color:#1e0010>cmdName:</span><span style=color:#f92672>&#34;move&#34;</span>,
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#960050;background-color:#1e0010>input:</span><span style=color:#f92672>&#34;0100000000&#34;</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>}
-</span></span></code></pre></div><h3 id=解析-1>解析</h3><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-JavaScript data-lang=JavaScript><span style=display:flex><span><span style=color:#66d9ef>var</span> <span style=color:#a6e22e>Parser</span> <span style=color:#f92672>=</span> (<span style=color:#66d9ef>function</span> () {
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>parseToJSON</span>(<span style=color:#a6e22e>request</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>requestJson</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>JSON</span>.<span style=color:#a6e22e>parse</span>(<span style=color:#a6e22e>request</span>);
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>cmdType</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>requestJson</span>.<span style=color:#a6e22e>cmdType</span>;
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>cmdName</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>requestJson</span>.<span style=color:#a6e22e>cmdName</span>;
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>typeObj</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>cmdObj</span>[<span style=color:#a6e22e>cmdType</span>];
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>typeObj</span> <span style=color:#f92672>==</span> <span style=color:#66d9ef>undefined</span>) {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#34;no such cmdType: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>cmdType</span>;
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>rawCmd</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>typeObj</span>[<span style=color:#a6e22e>cmdName</span>];
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>rawCmd</span> <span style=color:#f92672>==</span> <span style=color:#66d9ef>undefined</span>) {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#34;no such cmdName: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>cmdName</span> <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34; with cmdType: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>cmdType</span>;
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>input</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>requestJson</span>.<span style=color:#a6e22e>input</span>;
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>if</span> (<span style=color:#a6e22e>input</span> <span style=color:#f92672>!=</span> <span style=color:#66d9ef>undefined</span>) {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>parseByCmdType</span>(<span style=color:#a6e22e>cmdType</span>, <span style=color:#a6e22e>cmdName</span>, <span style=color:#a6e22e>input</span>);
-</span></span><span style=display:flex><span>        } <span style=color:#66d9ef>else</span> {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#34;input undefined!&#34;</span>;
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>parseByCmdType</span>(<span style=color:#a6e22e>cmdType</span>, <span style=color:#a6e22e>cmdName</span>, <span style=color:#a6e22e>input</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>typeObj</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>cmdObj</span>[<span style=color:#a6e22e>cmdType</span>];
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>switch</span> (<span style=color:#a6e22e>typeObj</span>) {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>case</span> <span style=color:#a6e22e>cmdObj</span>.<span style=color:#a6e22e>WoBlindTilt</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>parseByBlindTiltCmdName</span>(<span style=color:#a6e22e>cmdName</span>, <span style=color:#a6e22e>input</span>);
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>default</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#34;no such cmdType: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>cmdType</span> <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34; with input&#34;</span>;
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>parseByBlindTiltCmdName</span>(<span style=color:#a6e22e>cmdName</span>, <span style=color:#a6e22e>input</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>rawCmd</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>cmdObj</span>.<span style=color:#a6e22e>WoBlindTilt</span>[<span style=color:#a6e22e>cmdName</span>];
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>switch</span> (<span style=color:#a6e22e>rawCmd</span>) {
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>case</span> <span style=color:#a6e22e>cmdObj</span>.<span style=color:#a6e22e>WoBlindTilt</span>.<span style=color:#a6e22e>move</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>parseBlindTiltMoveCmd</span>(<span style=color:#a6e22e>input</span>);
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>case</span> <span style=color:#a6e22e>cmdObj</span>.<span style=color:#a6e22e>WoBlindTilt</span>.<span style=color:#a6e22e>setDirectionCmd</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>parseBlindTiltDirectionCmd</span>(<span style=color:#a6e22e>input</span>);
-</span></span><span style=display:flex><span>            <span style=color:#66d9ef>default</span><span style=color:#f92672>:</span>
-</span></span><span style=display:flex><span>                <span style=color:#66d9ef>return</span> <span style=color:#e6db74>&#34;no such cmdName: &#34;</span> <span style=color:#f92672>+</span> <span style=color:#a6e22e>cmdName</span> <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34; with cmdType: WoBlindTilt&#34;</span> <span style=color:#f92672>+</span> <span style=color:#e6db74>&#34; with input&#34;</span>;
-</span></span><span style=display:flex><span>        }
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>parseBlindTiltMoveCmd</span>(<span style=color:#a6e22e>input</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>bytes</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>hexToBytes</span>(<span style=color:#a6e22e>input</span>);
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>execCode</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0xff</span> <span style=color:#f92672>&amp;</span> <span style=color:#a6e22e>bytes</span>[<span style=color:#ae81ff>0</span>];
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>percent</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0xff</span> <span style=color:#f92672>&amp;</span> <span style=color:#a6e22e>bytes</span>[<span style=color:#ae81ff>1</span>];
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>output</span> <span style=color:#f92672>=</span> {};
-</span></span><span style=display:flex><span>        <span style=color:#a6e22e>output</span>.<span style=color:#a6e22e>currentPosition</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>percent</span>;
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>json</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>buildJSON</span>(<span style=color:#a6e22e>execCode</span>);
-</span></span><span style=display:flex><span>        <span style=color:#a6e22e>json</span>.<span style=color:#a6e22e>output</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>output</span>;
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>JSON</span>.<span style=color:#a6e22e>stringify</span>(<span style=color:#a6e22e>json</span>);
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>parseBlindTiltDirectionCmd</span>(<span style=color:#a6e22e>input</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>bytes</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>hexToBytes</span>(<span style=color:#a6e22e>input</span>);
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>execCode</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0xff</span> <span style=color:#f92672>&amp;</span> <span style=color:#a6e22e>bytes</span>[<span style=color:#ae81ff>0</span>];
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>json</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>buildJSON</span>(<span style=color:#a6e22e>execCode</span>);
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>JSON</span>.<span style=color:#a6e22e>stringify</span>(<span style=color:#a6e22e>json</span>);
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>buildJSON</span>(<span style=color:#a6e22e>execCode</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>var</span> <span style=color:#a6e22e>json</span> <span style=color:#f92672>=</span> {};
-</span></span><span style=display:flex><span>        <span style=color:#a6e22e>json</span>.<span style=color:#a6e22e>execCode</span> <span style=color:#f92672>=</span> <span style=color:#a6e22e>execCode</span>;
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>json</span>;
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>function</span> <span style=color:#a6e22e>hexToBytes</span>(<span style=color:#a6e22e>hex</span>) {
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>for</span> (<span style=color:#66d9ef>var</span> <span style=color:#a6e22e>bytes</span> <span style=color:#f92672>=</span> [], <span style=color:#a6e22e>c</span> <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>; <span style=color:#a6e22e>c</span> <span style=color:#f92672>&lt;</span> <span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>length</span>; <span style=color:#a6e22e>c</span> <span style=color:#f92672>+=</span> <span style=color:#ae81ff>2</span>)
-</span></span><span style=display:flex><span>            <span style=color:#a6e22e>bytes</span>.<span style=color:#a6e22e>push</span>(parseInt(<span style=color:#a6e22e>hex</span>.<span style=color:#a6e22e>substr</span>(<span style=color:#a6e22e>c</span>, <span style=color:#ae81ff>2</span>), <span style=color:#ae81ff>16</span>));
-</span></span><span style=display:flex><span>        <span style=color:#66d9ef>return</span> <span style=color:#a6e22e>bytes</span>;
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#66d9ef>return</span> {
-</span></span><span style=display:flex><span>        <span style=color:#a6e22e>parseToJSON</span><span style=color:#f92672>:</span> <span style=color:#a6e22e>parseToJSON</span>
-</span></span><span style=display:flex><span>    };
-</span></span><span style=display:flex><span>})();
-</span></span></code></pre></div><h3 id=输出-1>输出</h3><table><thead><tr><th>参数</th><th>类型</th><th>是否必需</th><th>备注</th></tr></thead><tbody><tr><td>execCode</td><td>int</td><td>是</td><td>指令执行状态</td></tr><tr><td>output</td><td>JSONObject</td><td>否</td><td>返回数据，按需动态生成</td></tr></tbody></table><p><strong>executeCode</strong></p><table><thead><tr><th>0x01</th><th>1</th><th>OK执行完毕</th></tr></thead><tbody><tr><td>0x02</td><td>2</td><td>ERROR执行出错</td></tr><tr><td>0x03</td><td>3</td><td>BUSY设备忙，请稍后重试</td></tr><tr><td>0x04</td><td>4</td><td>通信版本号不兼容</td></tr><tr><td>0x05</td><td>5</td><td>设备不支持此命令</td></tr><tr><td>0x06</td><td>6</td><td>设备电量低</td></tr><tr><td>0x07</td><td>7</td><td>设备已经加密（密钥已存在）</td></tr><tr><td>0x08</td><td>8</td><td>设备未加密</td></tr><tr><td>0x09</td><td>9</td><td>密码错误</td></tr><tr><td>0x0A</td><td>10</td><td>设备不支持这种加密方式</td></tr><tr><td>0x0B</td><td>11</td><td>找不到多跳设备</td></tr><tr><td>0x0C</td><td>12</td><td>连接网络失败</td></tr><tr><td>0x0D</td><td>13</td><td>当前模式下不支持此命令</td></tr><tr><td>0x0E</td><td>14</td><td>与需要保持连接的设备连接断开（从机离线返回0x0E）</td></tr><tr><td>0x0F</td><td>15</td><td>设置周期获取信息时Notify返回的命令执行状态（0x570E01）</td></tr></tbody></table><p><strong>示例</strong></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-JSON data-lang=JSON><span style=display:flex><span>{
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#960050;background-color:#1e0010>execCode:1,</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    <span style=color:#960050;background-color:#1e0010>output:{</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>        <span style=color:#960050;background-color:#1e0010>currentPosition:0</span>
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span>    }
-</span></span><span style=display:flex><span>
-</span></span><span style=display:flex><span><span style=color:#960050;background-color:#1e0010>}</span>
-</span></span></code></pre></div><h2 id=整体流程>整体流程</h2><p><img src=uml.png alt=uml></p><h2 id=android常用解析引擎>Android常用解析引擎</h2><h3 id=rhino>Rhino</h3><ul><li><del>不支持不全面，出现异常 Int8Array not defined；</del></li><li><del>未找到实现通过 <strong>JS</strong> 函数调用<strong>JS</strong> 函数的方法；</del></li><li>性能较低</li><li>包体积小</li></ul><h3 id=react-native>React Native</h3><ul><li>支持更全面</li><li>目前不需要单独集成</li><li>Android 调用 JS 方法待研究</li></ul><h3 id=j2v8>J2V8</h3><ul><li>支持较新的标准</li><li>单独引入会显著增大app打包体积（15MB左右,包含armeabi、arm64）÷</li></ul></section><footer class=article-footer><section class=article-tags><a href=/tags/android>Android</a>
-<a href=/tags/kotlin>Kotlin</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg><span>Licenced under CC BY-NC-SA 4.0</span></section></footer></article><aside class="widget related-contents--wrapper"><h1 class=widget-title>Related contents</h1><div class=related-contents><div class="flex article-list--tile"><article><a href=https://zole.life/p/android%E5%BA%94%E7%94%A8%E5%86%85%E4%B8%8B%E8%BD%BD%E5%B9%B6%E6%9B%B4%E6%96%B0apk/><div class=article-details><h2 class=article-title>Android应用内下载并更新APK</h2></div></a></article><article class=has-image><a href=https://zole.life/p/markdown-syntax-guide/><div class=article-image><img src=/p/markdown-syntax-guide/pawel-czerwinski-8uZPynIu-rQ-unsplash_hud7e36f7e20e71be184458283bdae4646_55974_250x150_fill_q75_box_smart1.jpg width=250 height=150 loading=lazy data-key data-hash="md5-xRTZFpFxc6SKQuARS0aZYQ=="></div><div class=article-details><h2 class=article-title>Markdown Syntax Guide</h2></div></a></article><article class=has-image><a href=https://zole.life/p/placeholder-text/><div class=article-image><img src=/p/placeholder-text/matt-le-SJSpo9hQf7s-unsplash_hu958d513eeefe5556a31d065479ecc5ac_14205_250x150_fill_q75_box_smart1.jpg width=250 height=150 loading=lazy data-key data-hash="md5-jq4GZk3fs+jcbgAHVstwOw=="></div><div class=article-details><h2 class=article-title>Placeholder Text</h2></div></a></article><article class=has-image><a href=https://zole.life/p/emoji-support/><div class=article-image><img src=/p/emoji-support/the-creative-exchange-d2zvqp3fpro-unsplash_huf941de4769045cdfa8c9ee7036519a2a_35369_250x150_fill_q75_box_smart1.jpg width=250 height=150 loading=lazy data-key data-hash="md5-YBFrHM/IYy6aZffVHfPvwg=="></div><div class=article-details><h2 class=article-title>Emoji Support</h2></div></a></article></div></div></aside><div class=disqus-container><div id=disqus_thread></div><script type=application/javascript>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//hugo-theme-stack.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></div><style>.disqus-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--content-padding)}</style><footer class=site-footer><section class=copyright>&copy; 2022 3702</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank>Stack</a></b> designed by
-<a href=https://jimmycai.com target=_blank>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true style=display:none><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Android 中动态加载 JavaScript"><title>JavaScript in Android</title><link rel=canonical href=https://zole.life/p/javascript-in-android/><link rel=stylesheet href=/scss/style.min.ac77dcf8b111b51da39a92990f431923f210f3876d85798a2125667f96dc33a4.css><meta property="og:title" content="JavaScript in Android"><meta property="og:description" content="Android 中动态加载 JavaScript"><meta property="og:url" content="https://zole.life/p/javascript-in-android/"><meta property="og:site_name" content="3702"><meta property="og:type" content="article"><meta property="article:section" content="Post"><meta property="article:tag" content="Android"><meta property="article:tag" content="kotlin"><meta property="article:published_time" content="2022-08-14T15:16:47+08:00"><meta property="article:modified_time" content="2022-08-14T15:16:47+08:00"><meta name=twitter:title content="JavaScript in Android"><meta name=twitter:description content="Android 中动态加载 JavaScript"><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/site.webmanifest><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><meta name=msapplication-TileColor content="#da532c"><meta name=theme-color content="#ffffff"></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/zole_hu6c40e7c739345855743ed1c4f74e2379_188935_300x0_resize_q75_box.jpg width=300 height=300 class=site-logo loading=lazy alt=Avatar></a></figure><div class=site-meta><h1 class=site-name><a href=/>3702</a></h1><h2 class=site-description>槑头脑和她脑公的地盘</h2></div></header><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg><span>Home</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg><span>Search</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>Archives</span></a></li><li><a href=/about/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg><span>About</span></a></li><div class=menu-bottom-section><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg><span>Dark Mode</span></li></div></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E5%8D%9A%E5%AE%A2/>博客</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/javascript-in-android/>JavaScript in Android</a></h2><h3 class=article-subtitle>Android 中动态加载 JavaScript</h3></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg><time class=article-time--published>Aug 14, 2022</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><time class=article-time--reading>5 minute read</time></div></footer></div></header><section class=article-content><h1 id=通过javascript解析蓝牙指令及蓝牙返回数据>通过JavaScript解析蓝牙指令及蓝牙返回数据</h1><h2 id=raw指令存储格式>Raw指令存储格式</h2><p>将ByteArray转换成HexString，根据指令类型及指令名称生成JSONObject。
+服务器以JSON格式保存蓝牙指令。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nt>&#34;cmdType&#34;</span><span class=p>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nt>&#34;cmdName&#34;</span><span class=p>:</span> <span class=s2>&#34;HexString(蓝牙指令)&#34;</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=bytearray-与-hexstring互相转换>ByteArray 与 HexString互相转换</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// Convert a hex string to a byte array
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>function</span> <span class=nx>hexToBytes</span><span class=p>(</span><span class=nx>hex</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kd>var</span> <span class=nx>bytes</span> <span class=o>=</span> <span class=p>[],</span> <span class=nx>c</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>c</span> <span class=o>&lt;</span> <span class=nx>hex</span><span class=p>.</span><span class=nx>length</span><span class=p>;</span> <span class=nx>c</span> <span class=o>+=</span> <span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=nx>bytes</span><span class=p>.</span><span class=nx>push</span><span class=p>(</span><span class=nb>parseInt</span><span class=p>(</span><span class=nx>hex</span><span class=p>.</span><span class=nx>substr</span><span class=p>(</span><span class=nx>c</span><span class=p>,</span> <span class=mi>2</span><span class=p>),</span> <span class=mi>16</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nx>bytes</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// Convert a byte array to a hex string
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>function</span> <span class=nx>bytesToHex</span><span class=p>(</span><span class=nx>bytes</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=kd>var</span> <span class=nx>hex</span> <span class=o>=</span> <span class=p>[],</span> <span class=nx>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>i</span> <span class=o>&lt;</span> <span class=nx>bytes</span><span class=p>.</span><span class=nx>length</span><span class=p>;</span> <span class=nx>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>current</span> <span class=o>=</span> <span class=nx>bytes</span><span class=p>[</span><span class=nx>i</span><span class=p>]</span> <span class=o>&lt;</span> <span class=mi>0</span> <span class=o>?</span> <span class=nx>bytes</span><span class=p>[</span><span class=nx>i</span><span class=p>]</span> <span class=o>+</span> <span class=mi>256</span> <span class=o>:</span> <span class=nx>bytes</span><span class=p>[</span><span class=nx>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=nx>hex</span><span class=p>.</span><span class=nx>push</span><span class=p>((</span><span class=nx>current</span> <span class=o>&gt;&gt;&gt;</span> <span class=mi>4</span><span class=p>).</span><span class=nx>toString</span><span class=p>(</span><span class=mi>16</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=nx>hex</span><span class=p>.</span><span class=nx>push</span><span class=p>((</span><span class=nx>current</span> <span class=o>&amp;</span> <span class=mh>0xF</span><span class=p>).</span><span class=nx>toString</span><span class=p>(</span><span class=mi>16</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=c1>//设置分隔符号,转换成大写
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>return</span> <span class=nx>hex</span><span class=p>.</span><span class=nx>join</span><span class=p>(</span><span class=s2>&#34;&#34;</span><span class=p>).</span><span class=nx>toUpperCase</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=javascript生成蓝牙指令>JavaScript生成蓝牙指令</h2><h3 id=输入>输入</h3><div class=table-wrapper><table><thead><tr><th>参数</th><th>类型</th><th>是否必需</th><th>备注</th></tr></thead><tbody><tr><td>cmdType</td><td>String</td><td>是</td><td>设备类型、指令类型</td></tr><tr><td>cmdName</td><td>String</td><td>是</td><td>指令名称</td></tr><tr><td>parameters</td><td>JSONObject</td><td>否</td><td>指令参数，按需动态生成</td></tr></tbody></table></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=err>cmdType:</span><span class=nt>&#34;WoBlindTilt&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=err>cmdName:</span><span class=nt>&#34;move&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=err>parameters:{</span>
+</span></span><span class=line><span class=cl>        <span class=err>percent:100</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span> 
+</span></span><span class=line><span class=cl><span class=err>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=解析>解析</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span><span class=lnt>79
+</span><span class=lnt>80
+</span><span class=lnt>81
+</span><span class=lnt>82
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=kr>const</span> <span class=nx>cmdJson</span> <span class=o>=</span> <span class=s1>&#39;&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>cmdObj</span> <span class=o>=</span> <span class=nx>JSON</span><span class=p>.</span><span class=nx>parse</span><span class=p>(</span><span class=nx>cmdJson</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kd>var</span> <span class=nx>CmdGenerator</span> <span class=o>=</span> <span class=p>(</span><span class=kd>function</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>getCmd</span><span class=p>(</span><span class=nx>request</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>requestJson</span> <span class=o>=</span> <span class=nx>JSON</span><span class=p>.</span><span class=nx>parse</span><span class=p>(</span><span class=nx>request</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>cmdType</span> <span class=o>=</span> <span class=nx>requestJson</span><span class=p>.</span><span class=nx>cmdType</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>cmdName</span> <span class=o>=</span> <span class=nx>requestJson</span><span class=p>.</span><span class=nx>cmdName</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>typeObj</span> <span class=o>=</span> <span class=nx>cmdObj</span><span class=p>[</span><span class=nx>cmdType</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span><span class=p>(</span><span class=nx>typeObj</span> <span class=o>==</span> <span class=kc>undefined</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=s2>&#34;no such cmdType: &#34;</span> <span class=o>+</span> <span class=nx>cmdType</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>rawCmd</span> <span class=o>=</span> <span class=nx>typeObj</span><span class=p>[</span><span class=nx>cmdName</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span><span class=p>(</span><span class=nx>rawCmd</span> <span class=o>==</span> <span class=kc>undefined</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=s2>&#34;no such cmdName: &#34;</span> <span class=o>+</span> <span class=nx>cmdName</span> <span class=o>+</span> <span class=s2>&#34; with cmdType: &#34;</span> <span class=o>+</span> <span class=nx>cmdType</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>parameters</span> <span class=o>=</span> <span class=nx>requestJson</span><span class=p>.</span><span class=nx>parameters</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span><span class=p>(</span><span class=nx>parameters</span> <span class=o>!=</span> <span class=kc>undefined</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=nx>getByCmdType</span><span class=p>(</span><span class=nx>cmdType</span><span class=p>,</span><span class=nx>cmdName</span><span class=p>,</span><span class=nx>parameters</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=nx>bytesToHex</span><span class=p>(</span><span class=nx>hexToBytes</span><span class=p>(</span><span class=nx>rawCmd</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>getByCmdType</span><span class=p>(</span><span class=nx>cmdType</span><span class=p>,</span><span class=nx>cmdName</span><span class=p>,</span><span class=nx>parameters</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>typeObj</span> <span class=o>=</span> <span class=nx>cmdObj</span><span class=p>[</span><span class=nx>cmdType</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=k>switch</span><span class=p>(</span><span class=nx>typeObj</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>case</span> <span class=nx>cmdObj</span><span class=p>.</span><span class=nx>WoBlindTilt</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=nx>getByBlindTiltCmdName</span><span class=p>(</span><span class=nx>cmdName</span><span class=p>,</span><span class=nx>parameters</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>default</span> <span class=o>:</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=s2>&#34;no such cmdType: &#34;</span> <span class=o>+</span> <span class=nx>cmdType</span> <span class=o>+</span> <span class=s2>&#34; with parameters&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>getByBlindTiltCmdName</span><span class=p>(</span><span class=nx>cmdName</span><span class=p>,</span><span class=nx>parameters</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>rawCmd</span> <span class=o>=</span> <span class=nx>cmdObj</span><span class=p>.</span><span class=nx>WoBlindTilt</span><span class=p>[</span><span class=nx>cmdName</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=k>switch</span><span class=p>(</span><span class=nx>rawCmd</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>case</span> <span class=nx>cmdObj</span><span class=p>.</span><span class=nx>WoBlindTilt</span><span class=p>.</span><span class=nx>move</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=nx>getBlindTiltMoveCmd</span><span class=p>(</span><span class=nx>rawCmd</span><span class=p>,</span><span class=nx>parameters</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>case</span> <span class=nx>cmdObj</span><span class=p>.</span><span class=nx>WoBlindTilt</span><span class=p>.</span><span class=nx>setDirectionCmd</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=nx>getBlindTiltDirectionCmd</span><span class=p>(</span><span class=nx>rawCmd</span><span class=p>,</span><span class=nx>parameters</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>default</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=s2>&#34;no such cmdName: &#34;</span> <span class=o>+</span> <span class=nx>cmdName</span> <span class=o>+</span>  <span class=s2>&#34; with cmdType: WoBlindTilt&#34;</span> <span class=o>+</span> <span class=s2>&#34; with parameters&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>getBlindTiltMoveCmd</span><span class=p>(</span><span class=nx>rawCmd</span><span class=p>,</span><span class=nx>parameters</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nx>rawCmd</span> <span class=o>+</span> <span class=nx>hex8</span><span class=p>(</span><span class=nx>parameters</span><span class=p>.</span><span class=nx>percent</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>getBlindTiltDirectionCmd</span><span class=p>(</span><span class=nx>rawCmd</span><span class=p>,</span><span class=nx>parameters</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>data</span> <span class=o>=</span> <span class=nx>parameters</span><span class=p>.</span><span class=nx>direction</span> <span class=o>|</span> <span class=mh>0x02</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nx>rawCmd</span> <span class=o>+</span> <span class=nx>hex8</span><span class=p>(</span><span class=nx>data</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>hexToBytes</span><span class=p>(</span><span class=nx>hex</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kd>var</span> <span class=nx>bytes</span> <span class=o>=</span> <span class=p>[],</span> <span class=nx>c</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>c</span> <span class=o>&lt;</span> <span class=nx>hex</span><span class=p>.</span><span class=nx>length</span><span class=p>;</span> <span class=nx>c</span> <span class=o>+=</span> <span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=nx>bytes</span><span class=p>.</span><span class=nx>push</span><span class=p>(</span><span class=nb>parseInt</span><span class=p>(</span><span class=nx>hex</span><span class=p>.</span><span class=nx>substr</span><span class=p>(</span><span class=nx>c</span><span class=p>,</span> <span class=mi>2</span><span class=p>),</span> <span class=mi>16</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nx>bytes</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>bytesToHex</span><span class=p>(</span><span class=nx>bytes</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kd>var</span> <span class=nx>hex</span> <span class=o>=</span> <span class=p>[],</span> <span class=nx>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>i</span> <span class=o>&lt;</span> <span class=nx>bytes</span><span class=p>.</span><span class=nx>length</span><span class=p>;</span> <span class=nx>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=kd>var</span> <span class=nx>current</span> <span class=o>=</span> <span class=nx>bytes</span><span class=p>[</span><span class=nx>i</span><span class=p>]</span> <span class=o>&lt;</span> <span class=mi>0</span> <span class=o>?</span> <span class=nx>bytes</span><span class=p>[</span><span class=nx>i</span><span class=p>]</span> <span class=o>+</span> <span class=mi>256</span> <span class=o>:</span> <span class=nx>bytes</span><span class=p>[</span><span class=nx>i</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>            <span class=nx>hex</span><span class=p>.</span><span class=nx>push</span><span class=p>((</span><span class=nx>current</span> <span class=o>&gt;&gt;&gt;</span> <span class=mi>4</span><span class=p>).</span><span class=nx>toString</span><span class=p>(</span><span class=mi>16</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>            <span class=nx>hex</span><span class=p>.</span><span class=nx>push</span><span class=p>((</span><span class=nx>current</span> <span class=o>&amp;</span> <span class=mh>0xF</span><span class=p>).</span><span class=nx>toString</span><span class=p>(</span><span class=mi>16</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nx>hex</span><span class=p>.</span><span class=nx>join</span><span class=p>(</span><span class=s2>&#34;&#34;</span><span class=p>).</span><span class=nx>toUpperCase</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>hex8</span><span class=p>(</span><span class=nx>val</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>val</span> <span class=o>&amp;=</span> <span class=mh>0xFF</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>hex</span> <span class=o>=</span> <span class=nx>val</span><span class=p>.</span><span class=nx>toString</span><span class=p>(</span><span class=mi>16</span><span class=p>).</span><span class=nx>toUpperCase</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=p>(</span><span class=s2>&#34;00&#34;</span> <span class=o>+</span> <span class=nx>hex</span><span class=p>).</span><span class=nx>slice</span><span class=p>(</span><span class=o>-</span><span class=mi>2</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>getCmd</span><span class=o>:</span> <span class=nx>getCmd</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>})();</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=输出>输出</h3><h4 id=原始指令无需组装拼接参数>原始指令（无需组装、拼接参数）</h4><ul><li>HexString</li></ul><h4 id=组合指令>组合指令</h4><ul><li>在JavaScript中组合后转换为HexString</li></ul><h2 id=javascript解析蓝牙返回数据>JavaScript解析蓝牙返回数据</h2><p>获取设备返回的结果后，通过JavaScript解析数据</p><h3 id=输入-1>输入</h3><div class=table-wrapper><table><thead><tr><th>参数</th><th>类型</th><th>是否必需</th><th>备注</th></tr></thead><tbody><tr><td>cmdType</td><td>String</td><td>是</td><td>设备类型、指令类型</td></tr><tr><td>cmdName</td><td>String</td><td>是</td><td>指令名称</td></tr><tr><td>input</td><td>String</td><td>是</td><td>设备返回的结果</td></tr></tbody></table></div><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-JSON data-lang=JSON><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=err>cmdType:</span><span class=nt>&#34;WoBlindTilt&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=err>cmdName:</span><span class=nt>&#34;move&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=err>input:</span><span class=nt>&#34;0100000000&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=解析-1>解析</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-JavaScript data-lang=JavaScript><span class=line><span class=cl><span class=kd>var</span> <span class=nx>Parser</span> <span class=o>=</span> <span class=p>(</span><span class=kd>function</span> <span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>parseToJSON</span><span class=p>(</span><span class=nx>request</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>requestJson</span> <span class=o>=</span> <span class=nx>JSON</span><span class=p>.</span><span class=nx>parse</span><span class=p>(</span><span class=nx>request</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>cmdType</span> <span class=o>=</span> <span class=nx>requestJson</span><span class=p>.</span><span class=nx>cmdType</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>cmdName</span> <span class=o>=</span> <span class=nx>requestJson</span><span class=p>.</span><span class=nx>cmdName</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>typeObj</span> <span class=o>=</span> <span class=nx>cmdObj</span><span class=p>[</span><span class=nx>cmdType</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=nx>typeObj</span> <span class=o>==</span> <span class=kc>undefined</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=s2>&#34;no such cmdType: &#34;</span> <span class=o>+</span> <span class=nx>cmdType</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>rawCmd</span> <span class=o>=</span> <span class=nx>typeObj</span><span class=p>[</span><span class=nx>cmdName</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=nx>rawCmd</span> <span class=o>==</span> <span class=kc>undefined</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=s2>&#34;no such cmdName: &#34;</span> <span class=o>+</span> <span class=nx>cmdName</span> <span class=o>+</span> <span class=s2>&#34; with cmdType: &#34;</span> <span class=o>+</span> <span class=nx>cmdType</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>input</span> <span class=o>=</span> <span class=nx>requestJson</span><span class=p>.</span><span class=nx>input</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=nx>input</span> <span class=o>!=</span> <span class=kc>undefined</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=nx>parseByCmdType</span><span class=p>(</span><span class=nx>cmdType</span><span class=p>,</span> <span class=nx>cmdName</span><span class=p>,</span> <span class=nx>input</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>return</span> <span class=s2>&#34;input undefined!&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>parseByCmdType</span><span class=p>(</span><span class=nx>cmdType</span><span class=p>,</span> <span class=nx>cmdName</span><span class=p>,</span> <span class=nx>input</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>typeObj</span> <span class=o>=</span> <span class=nx>cmdObj</span><span class=p>[</span><span class=nx>cmdType</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=k>switch</span> <span class=p>(</span><span class=nx>typeObj</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>case</span> <span class=nx>cmdObj</span><span class=p>.</span><span class=nx>WoBlindTilt</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=nx>parseByBlindTiltCmdName</span><span class=p>(</span><span class=nx>cmdName</span><span class=p>,</span> <span class=nx>input</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>default</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=s2>&#34;no such cmdType: &#34;</span> <span class=o>+</span> <span class=nx>cmdType</span> <span class=o>+</span> <span class=s2>&#34; with input&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>parseByBlindTiltCmdName</span><span class=p>(</span><span class=nx>cmdName</span><span class=p>,</span> <span class=nx>input</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>rawCmd</span> <span class=o>=</span> <span class=nx>cmdObj</span><span class=p>.</span><span class=nx>WoBlindTilt</span><span class=p>[</span><span class=nx>cmdName</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=k>switch</span> <span class=p>(</span><span class=nx>rawCmd</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=k>case</span> <span class=nx>cmdObj</span><span class=p>.</span><span class=nx>WoBlindTilt</span><span class=p>.</span><span class=nx>move</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=nx>parseBlindTiltMoveCmd</span><span class=p>(</span><span class=nx>input</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>case</span> <span class=nx>cmdObj</span><span class=p>.</span><span class=nx>WoBlindTilt</span><span class=p>.</span><span class=nx>setDirectionCmd</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=nx>parseBlindTiltDirectionCmd</span><span class=p>(</span><span class=nx>input</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>            <span class=k>default</span><span class=o>:</span>
+</span></span><span class=line><span class=cl>                <span class=k>return</span> <span class=s2>&#34;no such cmdName: &#34;</span> <span class=o>+</span> <span class=nx>cmdName</span> <span class=o>+</span> <span class=s2>&#34; with cmdType: WoBlindTilt&#34;</span> <span class=o>+</span> <span class=s2>&#34; with input&#34;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>parseBlindTiltMoveCmd</span><span class=p>(</span><span class=nx>input</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>bytes</span> <span class=o>=</span> <span class=nx>hexToBytes</span><span class=p>(</span><span class=nx>input</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>execCode</span> <span class=o>=</span> <span class=mh>0xff</span> <span class=o>&amp;</span> <span class=nx>bytes</span><span class=p>[</span><span class=mi>0</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>percent</span> <span class=o>=</span> <span class=mh>0xff</span> <span class=o>&amp;</span> <span class=nx>bytes</span><span class=p>[</span><span class=mi>1</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>output</span> <span class=o>=</span> <span class=p>{};</span>
+</span></span><span class=line><span class=cl>        <span class=nx>output</span><span class=p>.</span><span class=nx>currentPosition</span> <span class=o>=</span> <span class=nx>percent</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>json</span> <span class=o>=</span> <span class=nx>buildJSON</span><span class=p>(</span><span class=nx>execCode</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=nx>json</span><span class=p>.</span><span class=nx>output</span> <span class=o>=</span> <span class=nx>output</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nx>JSON</span><span class=p>.</span><span class=nx>stringify</span><span class=p>(</span><span class=nx>json</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>parseBlindTiltDirectionCmd</span><span class=p>(</span><span class=nx>input</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>bytes</span> <span class=o>=</span> <span class=nx>hexToBytes</span><span class=p>(</span><span class=nx>input</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>execCode</span> <span class=o>=</span> <span class=mh>0xff</span> <span class=o>&amp;</span> <span class=nx>bytes</span><span class=p>[</span><span class=mi>0</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>json</span> <span class=o>=</span> <span class=nx>buildJSON</span><span class=p>(</span><span class=nx>execCode</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nx>JSON</span><span class=p>.</span><span class=nx>stringify</span><span class=p>(</span><span class=nx>json</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>buildJSON</span><span class=p>(</span><span class=nx>execCode</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kd>var</span> <span class=nx>json</span> <span class=o>=</span> <span class=p>{};</span>
+</span></span><span class=line><span class=cl>        <span class=nx>json</span><span class=p>.</span><span class=nx>execCode</span> <span class=o>=</span> <span class=nx>execCode</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nx>json</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=kd>function</span> <span class=nx>hexToBytes</span><span class=p>(</span><span class=nx>hex</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=p>(</span><span class=kd>var</span> <span class=nx>bytes</span> <span class=o>=</span> <span class=p>[],</span> <span class=nx>c</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>c</span> <span class=o>&lt;</span> <span class=nx>hex</span><span class=p>.</span><span class=nx>length</span><span class=p>;</span> <span class=nx>c</span> <span class=o>+=</span> <span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=nx>bytes</span><span class=p>.</span><span class=nx>push</span><span class=p>(</span><span class=nb>parseInt</span><span class=p>(</span><span class=nx>hex</span><span class=p>.</span><span class=nx>substr</span><span class=p>(</span><span class=nx>c</span><span class=p>,</span> <span class=mi>2</span><span class=p>),</span> <span class=mi>16</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=nx>bytes</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>parseToJSON</span><span class=o>:</span> <span class=nx>parseToJSON</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=p>})();</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=输出-1>输出</h3><div class=table-wrapper><table><thead><tr><th>参数</th><th>类型</th><th>是否必需</th><th>备注</th></tr></thead><tbody><tr><td>execCode</td><td>int</td><td>是</td><td>指令执行状态</td></tr><tr><td>output</td><td>JSONObject</td><td>否</td><td>返回数据，按需动态生成</td></tr></tbody></table></div><p><strong>executeCode</strong></p><div class=table-wrapper><table><thead><tr><th>0x01</th><th>1</th><th>OK执行完毕</th></tr></thead><tbody><tr><td>0x02</td><td>2</td><td>ERROR执行出错</td></tr><tr><td>0x03</td><td>3</td><td>BUSY设备忙，请稍后重试</td></tr><tr><td>0x04</td><td>4</td><td>通信版本号不兼容</td></tr><tr><td>0x05</td><td>5</td><td>设备不支持此命令</td></tr><tr><td>0x06</td><td>6</td><td>设备电量低</td></tr><tr><td>0x07</td><td>7</td><td>设备已经加密（密钥已存在）</td></tr><tr><td>0x08</td><td>8</td><td>设备未加密</td></tr><tr><td>0x09</td><td>9</td><td>密码错误</td></tr><tr><td>0x0A</td><td>10</td><td>设备不支持这种加密方式</td></tr><tr><td>0x0B</td><td>11</td><td>找不到多跳设备</td></tr><tr><td>0x0C</td><td>12</td><td>连接网络失败</td></tr><tr><td>0x0D</td><td>13</td><td>当前模式下不支持此命令</td></tr><tr><td>0x0E</td><td>14</td><td>与需要保持连接的设备连接断开（从机离线返回0x0E）</td></tr><tr><td>0x0F</td><td>15</td><td>设置周期获取信息时Notify返回的命令执行状态（0x570E01）</td></tr></tbody></table></div><p><strong>示例</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-JSON data-lang=JSON><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=err>execCode:1,</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=err>output:{</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=err>currentPosition:0</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=err>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=整体流程>整体流程</h2><p><img src=/p/javascript-in-android/uml.png width=1348 height=1438 srcset="/p/javascript-in-android/uml_hu4b28e66a16dc43611f95dc55014799e7_125765_480x0_resize_box_3.png 480w, /p/javascript-in-android/uml_hu4b28e66a16dc43611f95dc55014799e7_125765_1024x0_resize_box_3.png 1024w" loading=lazy alt=uml class=gallery-image data-flex-grow=93 data-flex-basis=224px></p><h2 id=android常用解析引擎>Android常用解析引擎</h2><h3 id=rhino>Rhino</h3><ul><li><del>不支持不全面，出现异常 Int8Array not defined；</del></li><li><del>未找到实现通过 <strong>JS</strong> 函数调用<strong>JS</strong> 函数的方法；</del></li><li>性能较低</li><li>包体积小</li></ul><h3 id=react-native>React Native</h3><ul><li>支持更全面</li><li>目前不需要单独集成</li><li>Android 调用 JS 方法待研究</li></ul><h3 id=j2v8>J2V8</h3><ul><li>支持较新的标准</li><li>单独引入会显著增大app打包体积（15MB左右,包含armeabi、arm64）÷</li></ul></section><footer class=article-footer><section class=article-tags><a href=/tags/android/>Android</a>
+<a href=/tags/kotlin/>kotlin</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg><span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><aside class=related-content--wrapper><h2 class=section-title>Related content</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/android%E5%BA%94%E7%94%A8%E5%86%85%E4%B8%8B%E8%BD%BD%E5%B9%B6%E6%9B%B4%E6%96%B0apk/><div class=article-details><h2 class=article-title>Android应用内下载并更新APK</h2></div></a></article><article class=has-image><a href=/p/markdown-syntax-guide/><div class=article-image><img src=/p/markdown-syntax-guide/_hud7e36f7e20e71be184458283bdae4646_55974_23a5d351d2fc2374f952239b6e9c423a.jpg width=250 height=150 loading=lazy alt="Featured image of post Markdown Syntax Guide" data-hash="md5-xRTZFpFxc6SKQuARS0aZYQ=="></div><div class=article-details><h2 class=article-title>Markdown Syntax Guide</h2></div></a></article><article class=has-image><a href=/p/placeholder-text/><div class=article-image><img src=/p/placeholder-text/_hu958d513eeefe5556a31d065479ecc5ac_14205_7bffa90d1e66ca9b8184fda08a99dc7e.jpg width=250 height=150 loading=lazy alt="Featured image of post Placeholder Text" data-hash="md5-jq4GZk3fs+jcbgAHVstwOw=="></div><div class=article-details><h2 class=article-title>Placeholder Text</h2></div></a></article><article class=has-image><a href=/p/emoji-support/><div class=article-image><img src=/p/emoji-support/_huf941de4769045cdfa8c9ee7036519a2a_35369_36687b530fa140121781e790cfd060e7.jpg width=250 height=150 loading=lazy alt="Featured image of post Emoji Support" data-hash="md5-YBFrHM/IYy6aZffVHfPvwg=="></div><div class=article-details><h2 class=article-title>Emoji Support</h2></div></a></article></div></div></aside><div class=disqus-container><div id=disqus_thread></div><script type=application/javascript>window.disqus_config=function(){},function(){if(["localhost","127.0.0.1"].indexOf(window.location.hostname)!=-1){document.getElementById("disqus_thread").innerHTML="Disqus comments not available by default when the website is previewed locally.";return}var t=document,e=t.createElement("script");e.async=!0,e.src="//hugo-theme-stack.disqus.com/embed.js",e.setAttribute("data-timestamp",+new Date),(t.head||t.body).appendChild(e)}()</script><noscript>Please enable JavaScript to view the <a href=https://disqus.com/?ref_noscript>comments powered by Disqus.</a></noscript><a href=https://disqus.com class=dsq-brlink>comments powered by <span class=logo-disqus>Disqus</span></a></div><style>.disqus-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--card-padding)}</style><script>window.addEventListener("onColorSchemeChange",e=>{typeof DISQUS=="object"&&DISQUS.reset({reload:!0})})</script><footer class=site-footer><section class=copyright>&copy;
+2018 -
+2022 3702</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.13.0>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
 <button class="pswp__button pswp__button--share" title=Share></button>
 <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
 <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
-<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.5/dist/vibrant.min.js integrity="sha256-5NovOZc4iwiAWTYIFiIM7DxKUXKWvpVEuMEPLzcm5/g=" crossorigin=anonymous></script>
-<script type=text/javascript src=/ts/main.js defer></script>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">Table of contents</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#raw指令存储格式>Raw指令存储格式</a></li><li><a href=#bytearray-与-hexstring互相转换>ByteArray 与 HexString互相转换</a></li><li><a href=#javascript生成蓝牙指令>JavaScript生成蓝牙指令</a><ol><li><a href=#输入>输入</a></li><li><a href=#解析>解析</a></li><li><a href=#输出>输出</a><ol><li><a href=#原始指令无需组装拼接参数>原始指令（无需组装、拼接参数）</a></li><li><a href=#组合指令>组合指令</a></li></ol></li></ol></li><li><a href=#javascript解析蓝牙返回数据>JavaScript解析蓝牙返回数据</a><ol><li><a href=#输入-1>输入</a></li><li><a href=#解析-1>解析</a></li><li><a href=#输出-1>输出</a></li></ol></li><li><a href=#整体流程>整体流程</a></li><li><a href=#android常用解析引擎>Android常用解析引擎</a><ol><li><a href=#rhino>Rhino</a></li><li><a href=#react-native>React Native</a></li><li><a href=#j2v8>J2V8</a></li></ol></li></ol></nav></div></section></aside></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script>
 <script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>
